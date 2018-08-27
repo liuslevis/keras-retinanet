@@ -185,7 +185,7 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         history = LossHistory(
             os.path.join(
                 args.snapshot_path,
-                '{backbone}_{dataset_type}_{{epoch:02d}}.log'.format(backbone=args.backbone, dataset_type=args.dataset_type)
+                '{backbone}_{dataset_type}.log'.format(backbone=args.backbone, dataset_type=args.dataset_type)
             )
         )
         callbacks.append(history)
@@ -212,6 +212,7 @@ class LossHistory(keras.callbacks.Callback):
         self.logs = {}
 
     def on_batch_end(self, batch, logs={}):
+        print('logs', logs)
         with open(self.log_path, 'w') as f:
             for key in ['loss', 'regression_loss', 'classification_loss']:
                 self.logs.setdefault(key, [])
