@@ -185,7 +185,7 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         history = LossHistory(
             os.path.join(
                 args.snapshot_path,
-                '{backbone}_{dataset_type}.log'.format(backbone=args.backbone, dataset_type=args.dataset_type)
+                '{backbone}_{dataset_type}_{{epoch:02d}}.log'.format(backbone=args.backbone, dataset_type=args.dataset_type)
             )
         )
         callbacks.append(history)
@@ -210,16 +210,17 @@ class LossHistory(keras.callbacks.Callback):
     
     def on_train_begin(self, logs={}):
         self.logs = {}
+        self.epoch = 0
 
-    def on_batch_end(self, batch, logs={}):
-        print('logs', logs)
-        with open(self.log_path, 'w') as f:
+    def on_epoch_end(self, batch, logs={}):
+        self.epoch += 1
+        with open(self.log_path.format(epoch=self.epoch), 'w') as f:
             for key in ['loss', 'regression_loss', 'classification_loss']:
                 self.logs.setdefault(key, [])
                 self.logs[key].append(logs[key])
                 try:
                     f.write(f'{key}=')
-                    f.write(','.join([f'{i:.4f}' for i in logs[key]]))
+                    f.write(','.join([f'{i:.4f}' for i in self.logs[key]]))
                     f.write(f'\n')
                 except Exception as e:
                     pass
@@ -497,3 +498,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
