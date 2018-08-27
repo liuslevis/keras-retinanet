@@ -47,7 +47,6 @@ from ..utils.keras_version import check_keras_version
 from ..utils.model import freeze as freeze_model
 from ..utils.transform import random_transform_generator
 
-
 def makedirs(path):
     # Intended behavior: try to create the directory,
     # pass if the directory exists already, fails otherwise.
@@ -122,7 +121,6 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
 
     return model, training_model, prediction_model
 
-
 def create_callbacks(model, training_model, prediction_model, validation_generator, args):
     """ Creates the callbacks to use during training.
 
@@ -182,6 +180,16 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         checkpoint = RedirectModel(checkpoint, model)
         callbacks.append(checkpoint)
 
+    # record loss 
+    if args.snapshots:
+        history = LossHistory(
+            os.path.join(
+                args.snapshot_path,
+                '{backbone}_{dataset_type}_{{epoch:02d}}.log'.format(backbone=args.backbone, dataset_type=args.dataset_type)
+            )
+        )
+        callbacks.append(history)
+
     callbacks.append(keras.callbacks.ReduceLROnPlateau(
         monitor  = 'loss',
         factor   = 0.1,
@@ -195,6 +203,25 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
 
     return callbacks
 
+class LossHistory(keras.callbacks.Callback):
+    def __init__(self, log_path):
+        super(LossHistory, self).__init__()
+        self.log_path = log_path
+    
+    def on_train_begin(self, logs={}):
+        self.logs = {}
+
+    def on_batch_end(self, batch, logs={}):
+        with open(self.log_path, 'w') as f:
+            for key in ['loss', 'regression_loss', 'classification_loss']:
+                self.logs.setdefault(key, [])
+                self.logs[key].append(logs[key])
+                try:
+                    f.write(f'{key}=')
+                    f.write(','.join([f'{i:.4f}' for i in logs[key]]))
+                    f.write(f'\n')
+                except Exception as e:
+                    pass
 
 def create_generators(args, preprocess_image):
     """ Create generators for training and validation.
@@ -459,14 +486,13 @@ def main(args=None):
     )
 
     # start training
-    training_model.fit_generator(
+    history = training_model.fit_generator(
         generator=train_generator,
         steps_per_epoch=args.steps,
         epochs=args.epochs,
         verbose=1,
         callbacks=callbacks,
     )
-
 
 if __name__ == '__main__':
     main()

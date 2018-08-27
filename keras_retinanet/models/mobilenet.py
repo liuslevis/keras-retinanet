@@ -48,7 +48,6 @@ class MobileNetBackbone(Backbone):
         imagenet shape dimension and 'alpha' controls the width of the network.
         For more info check the explanation from the keras mobilenet script itself.
         """
-
         alpha = float(self.backbone.split('_')[1])
         rows = int(self.backbone.split('_')[0].replace('mobilenet', ''))
 
@@ -68,7 +67,6 @@ class MobileNetBackbone(Backbone):
         model_name = 'mobilenet_{}_{}_tf_no_top.h5'.format(alpha_text, rows)
         weights_url = mobilenet.BASE_WEIGHT_PATH + model_name
         weights_path = get_file(model_name, weights_url, cache_subdir='models')
-
         return weights_path
 
     def validate(self):
