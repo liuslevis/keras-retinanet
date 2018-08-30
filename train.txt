@@ -3,11 +3,11 @@ cd keras-retinanet
 pip3 install . --user
 python3 setup.py build_ext --inplace
 mkdir models 
-wget https://github.com/fizyr/keras-models/releases/download/v0.0.1/ResNet-50-model.keras.h5 -O models/ResNet-50-model.keras.h5 &
-wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_128_tf_no_top.h5 -O models/mobilenet_1_0_128_tf_no_top.h5 &
-wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_128_tf_no_top.h5 -O models/mobilenet_5_0_128_tf_no_top.h5 &
-wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_128_tf_no_top.h5 -O models/mobilenet_2_5_128_tf_no_top.h5 &
-wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_128_tf_no_top.h5 -O models/mobilenet_7_5_128_tf_no_top.h5 &
+wget https://github.com/fizyr/keras-models/releases/download/v0.0.1/ResNet-50-model.keras.h5 -O models/ResNet-50-model.keras.h5
+wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_128_tf_no_top.h5 -O models/mobilenet_1_0_128_tf_no_top.h5
+wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_128_tf_no_top.h5 -O models/mobilenet_5_0_128_tf_no_top.h5
+wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_128_tf_no_top.h5 -O models/mobilenet_2_5_128_tf_no_top.h5
+wget https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_128_tf_no_top.h5 -O models/mobilenet_7_5_128_tf_no_top.h5
 
 # Pretrained Models
 
@@ -17,27 +17,49 @@ https://github.com/fchollet/deep-learning-models/releases/
 
 python3 keras_retinanet/bin/train.py --epochs 20 --backbone resnet50 --gpu 0 --weights models/ResNet-50-model.keras.h5 csv ../FLVGetter/logo_train/annotations.csv ../FLVGetter/logo_train/labels.csv
 
+// mobilenet 1.0
 python3 keras_retinanet/bin/train.py \
-    --epochs 20 --backbone mobilenet128_1 --gpu 0 \
+    --epochs 20 \
+    --steps 4200 \
+    --gpu 0 \
+    --backbone mobilenet128_1 \
     --weights models/mobilenet_1_0_128_tf_no_top.h5 \
     csv \
-    ../FLVGetter/logo_train/annotations.csv \
-    ../FLVGetter/logo_train/labels.csv
+    ../FLVGetter/ad_train/annotations.csv \
+    ../FLVGetter/ad_train/labels.csv;
 
+// resnet 50
 python3 keras_retinanet/bin/train.py \
-    --epochs 20 --backbone mobilenet128_0.5 --gpu 0 \
+    --epochs 20 \
+    --steps 4200 \
+    --gpu 0 \
+    --backbone resnet50 \
+    --weights models/ResNet-50-model.keras.h5 \
+    csv \
+    ../FLVGetter/ad_train/annotations.csv \
+    ../FLVGetter/ad_train/labels.csv
+
+// mobilenet 0.5
+python3 keras_retinanet/bin/train.py \
+    --epochs 20 \
+    --steps 2150 \
+    --gpu 0 \
+    --backbone mobilenet128_0.5 \
     --weights models/mobilenet_5_0_128_tf_no_top.h5 \
     csv \
     ../FLVGetter/logo_train/annotations.csv \
-    ../FLVGetter/logo_train/labels.csv
+    ../FLVGetter/logo_train/labels.csv;
 
-// test on mac
+// retrain
 python3 keras_retinanet/bin/train.py \
-    --epochs 2 --backbone mobilenet128_1 \
-    --weights models/mobilenet_1_0_128_tf_no_top.h5 \
+    --gpu 0 \
+    --epochs 20 \
+    --steps 2150 \
+    --backbone resnet50 \
+    --weights models/resnet50_csv_20.h5 \
     csv \
-    ../FLVGetter/logo_train_small/annotations.csv \
-    ../FLVGetter/logo_train_small/labels.csv
+    ../FLVGetter/logo_train/annotations.csv \
+    ../FLVGetter/logo_train/labels.csv;
 
 # Test 
 
